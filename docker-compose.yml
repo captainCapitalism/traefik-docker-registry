@@ -11,6 +11,7 @@ services:
         REGISTRY_HTTP_ADDR: "0.0.0.0:5000"
     volumes:
       - ./data:/data
+      - ./config.yml:/etc/docker/registry/config.yml
 
   # Source: https://github.com/Joxit/docker-registry-ui
   registry-ui:
