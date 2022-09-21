@@ -11,3 +11,18 @@ services:
         REGISTRY_HTTP_ADDR: "0.0.0.0:5000"
     volumes:
       - ./data:/data
+
+  # Source: https://github.com/Joxit/docker-registry-ui
+  registry-ui:
+    restart: always
+    image: joxit/docker-registry-ui:2
+    ports:
+      - "8080:80"
+    environment:
+        REGISTRY_TITLE: "My Registry"
+        REGISTRY_URL: "http://localhost:5000"
+        REGISTRY_NAME: "My Registry"
+        REGISTRY_SSL: "false"
+    depends_on:
+        - registry
+
