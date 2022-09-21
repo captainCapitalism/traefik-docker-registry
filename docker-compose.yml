@@ -14,17 +14,32 @@ services:
       - ./registry/data:/data
       - ./registry/config.yml:/etc/docker/registry/config.yml
 
+    labels:
+      - "traefik.http.routers.registry.rule=Host(`registry.localhost`) && PathPrefix(`/v2/{*}`)"
+
   # Source: https://github.com/Joxit/docker-registry-ui
   registry-ui:
     restart: always
     image: joxit/docker-registry-ui:2
-    ports:
-      - "${UI__EXTERNAL_PORT}:80"
     environment:
         REGISTRY_TITLE: "My Registry"
-        REGISTRY_URL: "http://localhost:${REGISTRY__EXTERNAL_PORT}"
+        REGISTRY_URL: "http://registry.localhost"
         REGISTRY_NAME: "My Registry"
         REGISTRY_SSL: "false"
     depends_on:
         - registry
+    labels:
+      - "traefik.http.routers.registry-ui.rule=Host(`registry.localhost`)"
 
+  reverse-proxy:
+    restart: always
+    image: traefik:2.9
+    command:
+      - --providers.docker=true
+
+
+    ports:
+        - "80:80"
+        - "443:443"
+    volumes:
+        - /var/run/docker.sock:/var/run/docker.sock:ro
