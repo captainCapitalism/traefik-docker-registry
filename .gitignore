@@ -1,6 +1,7 @@
 .idea/
 .vscode/
 
+.env
 
 # Registry data volume
 registry/data/
