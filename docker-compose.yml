@@ -26,14 +26,25 @@ services:
         - registry
     labels:
       - "traefik.http.routers.registry-ui.rule=Host(`${APP_ADDRESS}`)"
+      - "traefik.http.routers.registry-ui.entrypoints=websecure"
+      - "traefik.http.routers.registry-ui.tls.certresolver=le"
 
   reverse-proxy:
     restart: always
     image: traefik:2.9
     command:
+      - --log.level=DEBUG
       - --providers.docker=true
+      - --api.insecure=true
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --certificatesresolvers.le.acme.email=${EMAIL}
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+
     ports:
-        - "80:80"
         - "443:443"
+        - "8080:8080"
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock:ro
+        - ./traefik/letsencrypt:/letsencrypt
