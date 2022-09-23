@@ -22,10 +22,10 @@ services:
     restart: always
     image: joxit/docker-registry-ui:2
     environment:
-      REGISTRY_URL: "http://${REGISTRY_ADDRESS}"
+      REGISTRY_URL: "https://${REGISTRY_ADDRESS}"
       REGISTRY_TITLE: "My Registry"
       REGISTRY_NAME: "My Registry"
-      REGISTRY_SSL: "false"
+      REGISTRY_SSL: "true"
     depends_on:
       - registry
     labels:
