@@ -6,26 +6,28 @@ services:
     image: registry:2
 
     environment:
-        REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /data
     volumes:
       - ./registry/data:/data
       - ./registry/config.yml:/etc/docker/registry/config.yml
 
     labels:
-      - "traefik.http.routers.registry.rule=Host(`${APP_ADDRESS}`) && PathPrefix(`/v2/{*}`)"
+      - "traefik.http.routers.registry.rule=Host(`${REGISTRY_ADDRESS}`)"
+      - "traefik.http.routers.registry.entrypoints=web"
 
   # Source: https://github.com/Joxit/docker-registry-ui
   registry-ui:
     restart: always
     image: joxit/docker-registry-ui:2
     environment:
-        REGISTRY_TITLE: "My Registry"
-        REGISTRY_NAME: "My Registry"
-        REGISTRY_SSL: "false"
+      REGISTRY_URL: "http://${REGISTRY_ADDRESS}"
+      REGISTRY_TITLE: "My Registry"
+      REGISTRY_NAME: "My Registry"
+      REGISTRY_SSL: "false"
     depends_on:
-        - registry
+      - registry
     labels:
-      - "traefik.http.routers.registry-ui.rule=Host(`${APP_ADDRESS}`)"
+      - "traefik.http.routers.registry-ui.rule=Host(`${REGISTRY_UI_ADDRESS}`)"
       - "traefik.http.routers.registry-ui.entrypoints=websecure"
       - "traefik.http.routers.registry-ui.tls.certresolver=le"
 
@@ -37,14 +39,16 @@ services:
       - --providers.docker=true
       - --api.insecure=true
       - --entrypoints.websecure.address=:443
+      - --entrypoints.web.address=:80
       - --certificatesresolvers.le.acme.tlschallenge=true
       - --certificatesresolvers.le.acme.email=${EMAIL}
       - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
 
     ports:
-        - "443:443"
-        - "8080:8080"
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
     volumes:
-        - /var/run/docker.sock:/var/run/docker.sock:ro
-        - ./traefik/letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/letsencrypt:/letsencrypt
