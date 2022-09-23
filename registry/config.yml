@@ -10,3 +10,7 @@ storage:
 
 http:
   addr: 0.0.0.0:5000
+
+htpasswd:
+    realm: registry
+    path: /auth/htpasswd

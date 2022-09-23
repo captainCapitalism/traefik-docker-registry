@@ -10,6 +10,7 @@ services:
     volumes:
       - ./registry/data:/data
       - ./registry/config.yml:/etc/docker/registry/config.yml
+      - ./registry/htpasswd:/auth/htpasswd
 
     labels:
       - "traefik.http.routers.registry.rule=Host(`${REGISTRY_ADDRESS}`)"
