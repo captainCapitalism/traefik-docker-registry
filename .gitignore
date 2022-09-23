@@ -3,8 +3,12 @@
 
 .env
 
-# Registry data volume
+# Registry
+# Data volumue
 registry/data/
+# Passwords
+.htpasswd
 
-# certificate
+# Traefik
+# Certificate
 acme.json
