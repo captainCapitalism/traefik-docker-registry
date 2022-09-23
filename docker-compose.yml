@@ -13,7 +13,9 @@ services:
 
     labels:
       - "traefik.http.routers.registry.rule=Host(`${REGISTRY_ADDRESS}`)"
-      - "traefik.http.routers.registry.entrypoints=web"
+      - "traefik.http.routers.registry.entrypoints=websecure"
+      - "traefik.http.routers.registry.tls.certresolver=le"
+      - "traefik.http.routers.registry.tls=true"
 
   # Source: https://github.com/Joxit/docker-registry-ui
   registry-ui:
@@ -30,6 +32,7 @@ services:
       - "traefik.http.routers.registry-ui.rule=Host(`${REGISTRY_UI_ADDRESS}`)"
       - "traefik.http.routers.registry-ui.entrypoints=websecure"
       - "traefik.http.routers.registry-ui.tls.certresolver=le"
+      - "traefik.http.routers.registry-ui.tls=true"
 
   reverse-proxy:
     restart: always
@@ -38,9 +41,10 @@ services:
       - --log.level=DEBUG
       - --providers.docker=true
       - --api.insecure=true
-      - --entrypoints.websecure.address=:443
       - --entrypoints.web.address=:80
-      - --certificatesresolvers.le.acme.tlschallenge=true
+      - --entrypoints.websecure.address=:443
+      - --certificatesresolvers.le.acme.httpchallenge=true
+      - --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
       - --certificatesresolvers.le.acme.email=${EMAIL}
       - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
       - --certificatesresolvers.le.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
@@ -52,3 +56,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/letsencrypt:/letsencrypt
+
+    labels:
+      - "traefik.http.routers.reverse-proxy.rul=Host(`${DASHBOARD_ADDRESS}`)"
+      - "traefik.http.routers.reverse-proxy.tls=true"
+      - "traefik.http.routers.reverse-proxy.tls.certresolver=le"
+      - "traefik.http.routers.reverse-proxy.entrypoints=websecure"
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=web"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+      - "traefik.http.routers.middlewares.redirect-to-https.redirectscheme.scheme=https"
