@@ -5,3 +5,6 @@
 
 # Registry data volume
 registry/data/
+
+# certificate
+acme.json
